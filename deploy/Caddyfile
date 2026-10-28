@@ -1,0 +1,19 @@
+# Caddy instalado como servicio en el host: un solo proxy para ambos entornos.
+admin-dev.tudominio.com {
+    handle_path /uploads/* {
+        root * /srv/distinto/develop/uploads
+        file_server
+    }
+    handle {
+        reverse_proxy 127.0.0.1:3101
+    }
+}
+admin.tudominio.com {
+    handle_path /uploads/* {
+        root * /srv/distinto/production/uploads
+        file_server
+    }
+    handle {
+        reverse_proxy 127.0.0.1:3001
+    }
+}

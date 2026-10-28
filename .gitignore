@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+data/platform.json
+data/*.db
+data/*.db-journal
+public/uploads
+.env
+.env*.local
+test-results/
+playwright-report/
+.test/

@@ -1,0 +1,273 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold: #c39a6e;
+  --color-gold-deep: #b8945a;
+  --color-ink: #1d1b19;
+  --color-carbon: #2a2926;
+  --color-stone: #6f6f6b;
+  --color-base: #fafaf8;
+  --color-sale: #c4473a;
+  --color-line: #e6e2da;
+  --color-whatsapp: #25d366;
+}
+
+@theme inline {
+  --font-sans: var(--font-work);
+  --font-display: var(--font-fraunces);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-base);
+    color: var(--color-ink);
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: #c39a6e;
+    color: #1d1b19;
+  }
+
+  :focus-visible {
+    outline: 2px solid #c39a6e;
+    outline-offset: 3px;
+  }
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes brand-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.brand-marquee {
+  animation: brand-marquee 28s linear infinite;
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateX(28px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.sheet-in {
+  animation: sheet-in 280ms ease;
+}
+
+.tile-wash {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.group:hover .tile-wash,
+.group:focus-visible .tile-wash,
+.group:focus-within .tile-wash {
+  opacity: 1;
+}
+
+.tile-from-top {
+  transform: translateY(-100%);
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.group:is(:hover, :focus-visible, :focus-within) .tile-from-top {
+  transform: translateY(0);
+}
+
+.nuevo-rest {
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.group:is(:hover, :focus-visible, :focus-within) .nuevo-rest {
+  transform: translateY(28px);
+  opacity: 0;
+}
+
+.tile-mark,
+.imp-shift {
+  transition: transform 0.3s ease-out, color 0.3s ease-out;
+}
+
+.tile-mark {
+  color: var(--mark, #cea761);
+}
+
+.group:hover .tile-mark,
+.group:focus-visible .tile-mark,
+.group:focus-within .tile-mark {
+  color: #b8845a;
+}
+
+.imp-title {
+  transition: color 0.3s ease-out;
+}
+
+.tile-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.tile-reveal > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.group:hover .tile-reveal,
+.group:focus-visible .tile-reveal,
+.group:focus-within .tile-reveal {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.nuevo-tile:is(:hover, :focus-visible, :focus-within) .nuevo-mark {
+  transform: translateY(14px);
+}
+
+.esen-copy,
+.sport-copy {
+  position: absolute;
+  top: 146px;
+  z-index: 20;
+  transition: top 0.3s ease-out;
+}
+
+.esen-copy { right: 48px; left: 16px; }
+.sport-copy { right: 16px; left: 40px; }
+
+.esen-tile:is(:hover, :focus-visible, :focus-within) .esen-copy,
+.sport-tile:is(:hover, :focus-visible, :focus-within) .sport-copy {
+  top: 52px;
+}
+
+.esen-tile:is(:hover, :focus-visible, :focus-within) .esen-title,
+.sport-tile:is(:hover, :focus-visible, :focus-within) .sport-title,
+.acc-tile:is(:hover, :focus-visible, :focus-within) .acc-title,
+.jun-tile:is(:hover, :focus-visible, :focus-within) .jun-title {
+  color: #fff;
+}
+
+.acc-tile:is(:hover, :focus-visible, :focus-within) .acc-copy {
+  transform: translate(-6px, 19px);
+}
+
+.acc-tile:is(:hover, :focus-visible, :focus-within) .acc-mark {
+  transform: translateX(-6px);
+}
+
+.sport-tile:is(:hover, :focus-visible, :focus-within) .sport-mark {
+  transform: translate(-1px, 5px);
+}
+
+.jun-tile:is(:hover, :focus-visible, :focus-within) .jun-copy {
+  transform: translate(-1px, 5px);
+}
+
+.jun-tile:is(:hover, :focus-visible, :focus-within) .jun-mark {
+  transform: translateY(11px);
+}
+
+.ofe-tile:is(:hover, :focus-visible, :focus-within) .ofe-mark {
+  transform: translateY(12px);
+}
+
+.brand-name {
+  transition: color 800ms ease, font-size 800ms ease, opacity 800ms ease;
+}
+
+.why-icon {
+  display: inline-block;
+  transform-origin: center;
+  transition: transform 450ms ease;
+}
+
+.why-item:hover .why-icon,
+.why-item:focus-within .why-icon {
+  transform: scale(1.16);
+}
+
+.why-title {
+  display: inline-block;
+  font-size: 16px;
+  line-height: 1.2;
+  transition: color 450ms ease, font-size 450ms ease;
+}
+
+.why-item:hover .why-title,
+.why-item:focus-within .why-title {
+  color: #b8845a;
+  font-size: 24px;
+}
+
+.why-copy {
+  display: grid;
+  grid-template-rows: 0fr;
+  margin: 0;
+  color: #2a2926;
+  font-size: 18px;
+  line-height: 1.35;
+  transition: grid-template-rows 450ms ease;
+}
+
+.why-item:hover .why-copy,
+.why-item:focus-within .why-copy {
+  grid-template-rows: 1fr;
+}
+
+.why-copy > span {
+  overflow: hidden;
+  min-height: 0;
+}
+
+@keyframes icon-pop {
+  0% {
+    transform: scale(0.45);
+    opacity: 0;
+  }
+  58% {
+    transform: scale(1.28);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.icon-pop {
+  animation: icon-pop 420ms cubic-bezier(0.2, 0.85, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

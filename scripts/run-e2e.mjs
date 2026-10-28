@@ -1,0 +1,10 @@
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { execFileSync } from "node:child_process";
+const folder = mkdtempSync(path.join(tmpdir(), "distinto-admin-e2e-"));
+Object.assign(process.env, { DATABASE_URL: `file:${path.join(folder, "test.db").replaceAll("\\", "/")}`, UPLOAD_DIR: path.join(folder, "uploads"), APP_ENV: "test", ALLOW_DEMO_SEED: "false", ADMIN_API_SECRET: "e2e-only-key", AUTH_SECRET: "e2e-only-auth-secret", STRIPE_SECRET_KEY: "", SMTP_HOST: "" });
+execFileSync(process.execPath, ["node_modules/prisma/build/index.js", "db", "push", "--skip-generate"], { stdio: "inherit", env: process.env });
+const { fixture } = await import("./test-fixture.mjs");
+await fixture();
+execFileSync(process.execPath, ["node_modules/@playwright/test/cli.js", "test"], { stdio: "inherit", env: process.env });

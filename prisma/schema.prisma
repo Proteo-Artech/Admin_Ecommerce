@@ -1,0 +1,361 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum StoreStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum UserRole {
+  ADMIN
+  MODERATOR
+  CUSTOMER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum PieceStatus {
+  AVAILABLE
+  SOLD
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CARD
+}
+
+enum ExperienceReview {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  SIMULATED
+  FAILED
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum TokenPurpose {
+  VERIFY_EMAIL
+  RESET_PASSWORD
+}
+
+model Store {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  domain      String      @unique
+  description String?
+  logo        String?
+  status      StoreStatus @default(ACTIVE)
+  createdAt   DateTime    @default(now())
+  products     Product[]
+  orders       Order[]
+  coupons      Coupon[]
+  members      StoreMember[]
+  subscribers  Subscriber[]
+  bulletins    Bulletin[]
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  email     String
+  source    String   @default("boletin")
+  createdAt DateTime @default(now())
+
+  @@unique([storeId, email])
+}
+
+model Bulletin {
+  id             String   @id @default(cuid())
+  storeId        String
+  store          Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  kind           String
+  subject        String
+  body           String
+  couponCode     String   @default("")
+  recipientCount Int      @default(0)
+  createdAt      DateTime @default(now())
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String?
+  name         String
+  lastName     String       @default("")
+  phone        String?
+  role         UserRole     @default(CUSTOMER)
+  status       UserStatus   @default(PENDING)
+  googleId     String?      @unique
+  createdAt    DateTime     @default(now())
+  addresses    Address[]
+  orders       Order[]
+  memberships  StoreMember[]
+  sessions     Session[]
+  tokens       AuthToken[]
+  redemptions  CouponRedemption[]
+}
+
+model Session {
+  token     String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model AuthToken {
+  id        String       @id @default(cuid())
+  userId    String?
+  user      User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email     String
+  purpose   TokenPurpose
+  codeHash  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime    @default(now())
+
+  @@index([email, purpose])
+}
+
+model StoreMember {
+  id        String   @id @default(cuid())
+  userId    String
+  storeId   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, storeId])
+}
+
+model Category {
+  id        String             @id @default(cuid())
+  name      String
+  slug      String             @unique
+  createdAt DateTime           @default(now())
+  products  Product[]
+  coupons   CouponOnCategory[]
+}
+
+model ProductType {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  products  Product[]
+}
+
+model Brand {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  logo      String?
+  createdAt DateTime  @default(now())
+  products  Product[]
+}
+
+model Product {
+  id            String       @id @default(cuid())
+  storeId       String
+  categoryId    String
+  productTypeId String
+  brandId       String
+  name          String
+  slug          String
+  description   String       @default("")
+  price         Float
+  comparePrice  Float?
+  size          String
+  colorName     String
+  colorHex      String
+  images        String
+  model         String       @default("")
+  stock         Int          @default(1)
+  isUnique      Boolean      @default(true)
+  pieceStatus   PieceStatus  @default(AVAILABLE)
+  soldOrderId   String?
+  isActive      Boolean      @default(true)
+  isFeatured    Boolean      @default(false)
+  isNew         Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  store         Store        @relation(fields: [storeId], references: [id])
+  category      Category     @relation(fields: [categoryId], references: [id])
+  productType   ProductType  @relation(fields: [productTypeId], references: [id])
+  brand         Brand        @relation(fields: [brandId], references: [id])
+  items         OrderItem[]
+
+  @@unique([storeId, slug])
+  @@index([storeId, pieceStatus])
+}
+
+model Address {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label          String
+  name           String    @default("")
+  phone          String    @default("")
+  street         String    @default("")
+  exteriorNumber String    @default("")
+  interiorNumber String    @default("")
+  neighborhood   String    @default("")
+  municipality   String    @default("")
+  references     String    @default("")
+  line           String
+  city           String
+  state          String    @default("")
+  zipCode        String    @default("")
+  isDefault      Boolean   @default(false)
+  confirmedAt    DateTime?
+  createdAt      DateTime  @default(now())
+}
+
+model Coupon {
+  id               String     @id @default(cuid())
+  storeId          String
+  store            Store      @relation(fields: [storeId], references: [id])
+  code             String
+  name             String
+  description      String     @default("")
+  type             CouponType
+  value            Float
+  minSubtotal      Float?
+  maxDiscount      Float?
+  startsAt         DateTime   @default(now())
+  endsAt           DateTime?
+  usageLimit       Int?
+  perCustomerLimit Int?
+  forNewCustomers  Boolean    @default(false)
+  isActive         Boolean    @default(true)
+  createdAt        DateTime   @default(now())
+  orders           Order[]
+  redemptions      CouponRedemption[]
+  categories       CouponOnCategory[]
+
+  @@unique([storeId, code])
+}
+
+model CouponOnCategory {
+  couponId   String
+  categoryId String
+  coupon     Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([couponId, categoryId])
+}
+
+model Order {
+  id                   String        @id @default(cuid())
+  storeId              String
+  store                Store         @relation(fields: [storeId], references: [id])
+  userId               String?
+  user                 User?         @relation(fields: [userId], references: [id])
+  orderNumber          String        @unique
+  status               OrderStatus   @default(PENDING)
+  customerName         String
+  customerEmail        String
+  phone                String
+  address              String
+  city                 String
+  isGift               Boolean       @default(false)
+  giftRecipientName    String?
+  giftRecipientPhone   String?
+  giftRecipientAddress String?
+  giftNote             String?
+  subtotal             Float
+  discount             Float         @default(0)
+  shipping             Float         @default(0)
+  total                Float
+  couponId             String?
+  coupon               Coupon?       @relation(fields: [couponId], references: [id])
+  couponCode           String?
+  paymentMethod        PaymentMethod @default(CARD)
+  paymentStatus        PaymentStatus @default(PENDING)
+  stripeSessionId      String?
+  notifiedAt           DateTime?
+  createdAt            DateTime      @default(now())
+  items                OrderItem[]
+  redemption           CouponRedemption?
+  experience           Experience?
+
+  @@index([storeId, createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String
+  price     Float
+  quantity  Int
+  size      String
+  color     String
+  total     Float
+}
+
+model Experience {
+  id           String            @id @default(cuid())
+  storeId      String
+  orderId      String            @unique
+  order        Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customerName String
+  rating       Int
+  body         String            @default("")
+  status       ExperienceReview  @default(PENDING)
+  createdAt    DateTime          @default(now())
+  photos       ExperiencePhoto[]
+
+  @@index([storeId, createdAt])
+}
+
+model ExperiencePhoto {
+  id           String     @id @default(cuid())
+  experienceId String
+  experience   Experience       @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  url          String
+  status       ExperienceReview @default(PENDING)
+}
+
+model CouponRedemption {
+  id             String   @id @default(cuid())
+  couponId       String
+  coupon         Coupon   @relation(fields: [couponId], references: [id])
+  orderId        String   @unique
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id])
+  storeId        String
+  discountAmount Float
+  createdAt      DateTime @default(now())
+}
